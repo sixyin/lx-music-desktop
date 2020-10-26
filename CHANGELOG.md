@@ -6,6 +6,90 @@ Project versioning adheres to [Semantic Versioning](http://semver.org/).
 Commit convention is based on [Conventional Commits](http://conventionalcommits.org).
 Change log format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [1.2.2](https://github.com/lyswhut/lx-music-desktop/compare/v1.2.1...v1.2.2) - 2020-10-18
+
+### 修复
+
+- 降级 Electron 到 9.x.x 版本修复 Linux 版桌面歌词窗口变白的问题
+
+## [1.2.1](https://github.com/lyswhut/lx-music-desktop/compare/v1.2.0...v1.2.1) - 2020-10-18
+
+### 优化
+
+- Linux版的软件界面默认使用圆角与阴影，顺便修复了桌面歌词窗口变白的问题，已在Ubuntu 18.10测试正常，若显示异常可尝试添加`-nt`参数启动
+
+### 修复
+
+- 修复聚合搜索的分页问题
+- 修复代理输入框输入的内容不生效的问题
+
+## [1.2.0](https://github.com/lyswhut/lx-music-desktop/compare/v1.1.1...v1.2.0) - 2020-09-30
+
+提前祝大家中秋&国庆快乐~
+
+### 新增
+
+- 播放控制栏开启/关闭桌面歌词按钮 新增右击按钮时锁定/解锁桌面歌词功能
+
+### 优化
+
+- 优化我的列表滚动条位置的保存逻辑
+- 更新设置-备份与恢复功能的描述
+- 优化软件内鼠标悬停的提示界面
+
+### 修复
+
+- 修复桌面歌词窗口不允许拖出桌面之外的位置计算偏移Bug
+- 修复网易云KTV嗨榜无法加载的问题
+- 修复初始化搜索历史列表功能
+- 修复重启软件后试听列表与收藏列表无法恢复上次的滚动位置的问题
+- 修复歌曲封面无法嵌入的Bug
+- 修复酷狗歌词格式问题
+- 修复关闭切换动画时从搜索候选列表点击内容无效的问题
+
+### 其他
+
+- 更新 Electron 到 v10.1.3
+
+## [1.1.1](https://github.com/lyswhut/lx-music-desktop/compare/v1.1.0...v1.1.1) - 2020-09-19
+
+### 修复
+
+- 修复某些情况下桌面歌词不会播放的问题
+
+## [1.1.0](https://github.com/lyswhut/lx-music-desktop/compare/v1.0.1...v1.1.0) - 2020-09-18
+
+### 新增
+
+- 在歌单详情界面新增播放当前歌单按钮、收藏歌单按钮，注：播放歌单不会将歌曲添加到试听列表
+- 新增`不允许将歌词窗口拖出主屏幕之外`的设置项，默认开启，在连接多个屏幕时想要拖动到其他屏幕时可关闭此设置
+- 新增大部分平台的歌词翻译，感谢 @InoriHimea 提供的[krc解码算法](https://github.com/lyswhut/lx-music-desktop/issues/296#issuecomment-683285784)
+- 新增`显示歌词翻译`设置，默认开启，仅支持某些平台，注：无论该设置是否开启，嵌入或下载歌词时都不会带上翻译
+- 新增`显示切换动画`设置，默认开启，关闭时将基本禁用软件内的所有切换动画
+- 播放状态栏新增桌面歌词的开关、播放模式的切换、歌曲的收藏按钮，Thanks to @andylow for the [icon](https://github.com/lyswhut/lx-music-desktop/pull/309)!
+
+### 修复
+
+- 修复使用全局快捷键还原窗口时，窗口没有获取焦点的问题
+- 修复我的列表搜索对最后一个字符的匹配问题
+- 修复窗口在`较小`模式下最小化/关闭按钮不居中的问题
+
+### 优化
+
+- 桌面歌词当前播放行改为上下居中
+- 为区分静音状态，静音时音量条会变淡，调整音量条时将会取消静音
+- 优化随机播放机制，现在通过`下一曲`切换歌曲时，直到播放完整个列表之前将不会再随机到之前播放过的歌曲，并且通过`上一曲`可以正确播放上一首歌曲
+- 当下载目录没有写入权限时将显示没有写入权限的提示
+
+### 移除
+
+- 移除默认的全局声音媒体快捷键接管
+- 移除对百度音乐的支持，因百度音乐原有的大部分API失效，而且该平台相对其他平台来说音乐太少了，可有可无，以后再看情况恢复
+
+### 其他
+
+- 更新electron到 10.1.2
+
 ## [1.0.1](https://github.com/lyswhut/lx-music-desktop/compare/v1.0.0...v1.0.1) - 2020-07-25
 
 ### 优化

@@ -3,7 +3,9 @@
   "basic_theme": "主题颜色",
   "basic_animation_title": "弹出层的动画效果",
   "basic_animation": "弹出层随机动画",
+  "basic_show_animation": "显示切换动画",
   "basic_source_title": "选择音乐来源",
+  "basic_source_yj": "五音版接口（为五音助手用户专门打造的五音版）",
   "basic_source_test": "测试接口（几乎软件的所有功能都可用）",
   "basic_source_temp": "临时接口（软件的某些功能不可用，建议测试接口不可用再使用本接口）",
   "basic_source": "音乐来源",
@@ -35,6 +37,7 @@
   "play_toggle_random": "列表随机",
   "play_toggle_list": "顺序播放",
   "play_toggle_single_loop": "单曲循环",
+  "play_lyric_transition": "显示歌词翻译",
   "play_quality_title": "启用时将优先播放320K品质的歌曲",
   "play_quality": "优先播放高品质音乐",
   "play_task_bar_title": "在任务栏上显示当前歌曲播放进度",
@@ -48,6 +51,7 @@
   "desktop_lyric_enable": "显示歌词",
   "desktop_lyric_lock": "锁定歌词",
   "desktop_lyric_always_on_top": "使歌词总是在其他窗口之上",
+  "desktop_lyric_lock_screen": "不允许歌词窗口拖出主屏幕之外",
 
   "search": "搜索设置",
   "search_hot_title": "是否显示热门搜索",
@@ -103,7 +107,7 @@
   "hot_key_desktop_lyric_toggle_always_top": "桌面歌词置顶切换",
 
   "network": "网络设置",
-  "network_proxy_title": "代理设置（乱设置软件将无法联网）",
+  "network_proxy_title": "HTTP代理设置（乱设置软件将无法联网）",
   "network_proxy_host": "主机",
   "network_proxy_port": "端口",
   "network_proxy_username": "用户名",
@@ -114,12 +118,12 @@
   "odc_clear_search_list": "离开搜索界面时清空搜索列表",
 
   "backup": "备份与恢复",
-  "backup_part": "部分数据",
+  "backup_part": "部分数据（列表数据包括试听列表、收藏列表、用户自定义列表，设置数据不包括快捷键设置）",
   "backup_part_import_list": "导入列表",
   "backup_part_export_list": "导出列表",
   "backup_part_import_setting": "导入设置",
   "backup_part_export_setting": "导出设置",
-  "backup_all": "所有数据（设置与试听列表）",
+  "backup_all": "所有数据（列表数据与设置数据）",
   "backup_all_import": "导入",
   "backup_all_export": "导出",
   "backup_all_import_desc": "选择备份文件",
@@ -149,7 +153,7 @@
   "update_checking": "检查更新中...",
   "update_init": "更新初始化中...",
 
-  "about": "关于洛雪音乐",
+  "about": "关于洛雪音乐（五音版）",
 
 
   "is_enable": "是否启用",

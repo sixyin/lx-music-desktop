@@ -95,7 +95,7 @@ function createWindow() {
     useContentSize: true,
     width: windowSizeInfo.width,
     frame: false,
-    transparent: !isLinux && !global.envParams.nt,
+    transparent: !global.envParams.nt,
     enableRemoteModule: false,
     // icon: path.join(global.__static, isWin ? 'icons/256x256.ico' : 'icons/512x512.png'),
     resizable: false,
@@ -124,14 +124,17 @@ global.appHotKey = {
 }
 
 function init() {
-  global.appSetting = initSetting()
+  const info = initSetting()
+  global.appSetting = info.setting
+  global.appSettingVersion = info.version
   global.appHotKey.config = initHotKey()
   global.lx_event.common.initSetting()
   global.lx_event.hotKey.init()
   createWindow()
 }
 
-app.on('ready', init)
+// https://github.com/electron/electron/issues/16809
+app.on('ready', isLinux ? () => setTimeout(init, 300) : init)
 
 app.on('activate', () => {
   if (global.modules.mainWindow) {

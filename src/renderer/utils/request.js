@@ -4,7 +4,7 @@ import { debugRequest } from './env'
 import { requestMsg } from './message'
 import { bHh } from './music/options'
 import { deflateRaw } from 'zlib'
-import { getProxyInfo } from './index'
+import { getProxyInfo, toMD5 } from './index'
 // import fs from 'fs'
 
 const request = (url, options, callback) => {
@@ -269,6 +269,14 @@ const fetchData = async(url, method, {
     let v2 = process.versions.app.split('-')[1] || ''
     headers[s] = !s || `${(await handleDeflateRaw(Buffer.from(JSON.stringify(`${url}${v}`.match(regx), null, 1).concat(v)).toString('base64'))).toString('hex')}&${parseInt(v)}${v2}`
     delete headers[bHh]
+  }
+  if (window.globalObj.apiSource === 'yj') {
+    let arrUrl = url.split('//')
+    let uri = arrUrl[1].substring(arrUrl[1].indexOf('/'))
+    if (uri.indexOf('?') != -1) {
+      uri = uri.split('?')[0]
+    }
+    headers.wycheck = toMD5(uri + 'wycheck').substr(0, 16)
   }
   return request(url, {
     ...options,
