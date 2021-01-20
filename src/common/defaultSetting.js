@@ -1,6 +1,5 @@
 const path = require('path')
 const os = require('os')
-const { isMac } = require('./utils')
 
 const defaultSetting = {
   version: '1.0.38',
@@ -86,13 +85,13 @@ const defaultSetting = {
   themeId: 6,
   langId: null,
   sourceId: 'kw',
-  apiSource: 'yj',
+  apiSource: 'wy',
   sourceNameType: 'alias',
   isShowAnimation: true,
   randomAnimate: true,
   ignoreVersion: null,
   isAgreePact: false,
-  controlBtnPosition: isMac ? 'left' : 'right',
+  controlBtnPosition: process.platform === 'darwin' ? 'left' : 'right',
 }
 
 const overwriteSetting = {
@@ -100,7 +99,7 @@ const overwriteSetting = {
 }
 
 // 使用新年皮肤
-if (new Date().getMonth() < 2) defaultSetting.themeId = 9
+// if (new Date().getMonth() < 2) defaultSetting.themeId = 9
 
 
 exports.defaultSetting = defaultSetting

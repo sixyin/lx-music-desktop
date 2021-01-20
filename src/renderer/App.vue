@@ -1,5 +1,5 @@
 <template lang="pug">
-#container(v-if="isProd && !isNt && !isLinux" :class="theme" @mouseenter="enableIgnoreMouseEvents" @mouseleave="dieableIgnoreMouseEvents")
+#container(v-if="isProd && !isDT && !isLinux" :class="theme" @mouseenter="enableIgnoreMouseEvents" @mouseleave="dieableIgnoreMouseEvents")
   core-aside#left
   #right
     core-toolbar#toolbar
@@ -41,7 +41,7 @@ export default {
   data() {
     return {
       isProd: process.env.NODE_ENV === 'production',
-      isNt: false,
+      isDT: false,
       isLinux,
       globalObj: {
         apiSource: 'test',
@@ -102,7 +102,7 @@ export default {
     }, 500)
   },
   mounted() {
-    document.body.classList.add(this.isNt ? 'noTransparent' : 'transparent')
+    document.body.classList.add(this.isDT ? 'disableTransparent' : 'transparent')
     window.eventHub.$emit(eventBaseName.bindKey)
     this.init()
   },
@@ -254,12 +254,12 @@ export default {
       music.init()
     },
     enableIgnoreMouseEvents() {
-      if (this.isNt) return
+      if (this.isDT) return
       rendererSend(NAMES.mainWindow.set_ignore_mouse_events, false)
       // console.log('content enable')
     },
     dieableIgnoreMouseEvents() {
-      if (this.isNt) return
+      if (this.isDT) return
       // console.log('content disable')
       rendererSend(NAMES.mainWindow.set_ignore_mouse_events, true)
     },
@@ -273,7 +273,21 @@ export default {
       getPlayList().then(({ defaultList, loveList, userList, downloadList }) => {
         if (!defaultList) defaultList = this.defaultList
         if (!loveList) loveList = this.loveList
-        if (!userList) userList = this.userList
+        if (userList) {
+          let needSave = false
+          const getListId = id => id.includes('.') ? getListId(id.substring(0, id.lastIndexOf('_'))) : id
+          userList.forEach(l => {
+            if (!l.id.includes('__') || l.source) return
+            let [source, id] = l.id.split('__')
+            id = getListId(id)
+            l.source = source
+            l.sourceListId = id
+            if (!needSave) needSave = true
+          })
+          if (needSave) this.saveUserList(userList)
+        } else {
+          userList = this.userList
+        }
 
         if (!defaultList.list) defaultList.list = []
         if (!loveList.list) loveList.list = []
@@ -306,7 +320,9 @@ export default {
     initPlayInfo() {
       rendererInvoke(NAMES.mainWindow.get_data, 'playInfo').then(info => {
         // console.log(info, window.allList)
+        window.restorePlayInfo = null
         if (!info) return
+        if (info.index < 0) return
         if (info.listId) {
           const list = window.allList[info.listId]
           // console.log(list)
@@ -364,12 +380,12 @@ export default {
     },
     handleEnvParamsInit(envParams) {
       this.envParams = envParams
-      this.isNt = this.envParams.nt
-      if (this.isNt) {
+      this.isDT = this.envParams.dt
+      if (this.isDT) {
         document.body.classList.remove('transparent')
-        document.body.classList.add('noTransparent')
+        document.body.classList.add('disableTransparent')
       }
-      if (this.isProd && !this.isNt && !this.isLinux) {
+      if (this.isProd && !this.isDT && !this.isLinux) {
         document.body.addEventListener('mouseenter', this.dieableIgnoreMouseEvents)
         document.body.addEventListener('mouseleave', this.enableIgnoreMouseEvents)
       }
@@ -439,8 +455,13 @@ body {
     background-color: transparent;
   }
 }
-.noTransparent {
+.disableTransparent {
   background-color: #fff;
+
+  #right {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
 }
 
 #container {

@@ -378,7 +378,7 @@ export default {
     id = id.toString()
     if (id.includes('special/single/')) {
       id = id.replace(this.regExps.listDetailLink, '$1')
-    } else if (/http(?:s):/.test(id)) {
+    } else if (/https?:/.test(id)) {
       return this.getUserListDetail(id.replace(/^.*http/, 'http'), page)
     } else if (/^\d+$/.test(id)) {
       return this.getUserListDetailByCode(id)
@@ -517,6 +517,7 @@ export default {
         img: null,
         lrc: null,
         hash: item.audio_info.hash,
+        otherSource: null,
         types,
         _types,
         typeUrl: {},

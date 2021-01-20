@@ -1,6 +1,6 @@
 <template lang="pug">
 div(:class="$style.player")
-  div(:class="$style.left" @contextmenu="handleToMusicLocation" @click="showPlayerDetail")
+  div(:class="$style.left" @contextmenu="handleToMusicLocation" @click="showPlayerDetail" :tips="$t('core.player.pic_tip')")
     img(v-if="musicInfo.img" :src="musicInfo.img" @error="imgError")
     svg(v-else version='1.1' xmlns='http://www.w3.org/2000/svg' xlink='http://www.w3.org/1999/xlink' height='102%' width='100%' viewBox='0 0 60 60' space='preserve')
       use(:xlink:href='`#${$style.iconPic}`')
@@ -92,6 +92,7 @@ import { mapGetters, mapActions, mapMutations } from 'vuex'
 import { requestMsg } from '../../utils/message'
 import { isMac } from '../../../common/utils'
 import { player as eventPlayerNames } from '../../../common/hotKey'
+import musicSdk from '@renderer/utils/music'
 import path from 'path'
 
 let audio
@@ -244,9 +245,32 @@ export default {
   watch: {
     changePlay(n) {
       if (!n) return
+      this.resetChangePlay()
+      if (window.restorePlayInfo) {
+        let musicInfo = this.targetSong = this.list[window.restorePlayInfo.index]
+        this.musicInfo.songmid = musicInfo.songmid
+        this.musicInfo.singer = musicInfo.singer
+        this.musicInfo.name = musicInfo.name
+        this.musicInfo.album = musicInfo.albumName
+        this.setImg(musicInfo)
+        this.setLrc(musicInfo)
+        this.nowPlayTime = this.restorePlayTime = window.restorePlayInfo.time
+        this.maxPlayTime = window.restorePlayInfo.maxTime || 0
+        this.handleUpdateWinLyricInfo('music_info', {
+          songmid: this.musicInfo.songmid,
+          singer: this.musicInfo.singer,
+          name: this.musicInfo.name,
+          album: this.musicInfo.album,
+        })
+        this.$nextTick(() => {
+          this.sendProgressEvent(this.progress, 'paused')
+        })
+        if (this.setting.player.togglePlayMethod == 'random') this.setPlayedList(musicInfo)
+        window.restorePlayInfo = null
+        return
+      }
       // console.log('changePlay')
       this.handleRemoveMusic()
-      this.resetChangePlay()
       if (this.playIndex < 0) return
       this.stopPlay()
       this.play()
@@ -295,6 +319,7 @@ export default {
       if (Math.abs(n - o) > 2) this.isActiveTransition = true
       this.savePlayInfo({
         time: n,
+        maxTime: this.maxPlayTime,
         listId: this.listId,
         list: this.listId == null ? this.list : null,
         index: this.playIndex,
@@ -359,6 +384,7 @@ export default {
         if (!this.musicInfo.songmid) return
         console.log('出错')
         this.stopPlay()
+        this.clearLoadingTimeout()
         if (this.listId != 'download' && audio.error.code !== 1 && this.retryNum < 2) { // 若音频URL无效则尝试刷新2次URL
           // console.log(this.retryNum)
           if (!this.restorePlayTime) this.restorePlayTime = audio.currentTime // 记录出错的播放时间
@@ -377,12 +403,7 @@ export default {
         this.clearLoadingTimeout()
         this.status = this.statusText = this.$t('core.player.loading')
         this.maxPlayTime = audio.duration
-        if (window.restorePlayInfo) {
-          audio.currentTime = window.restorePlayInfo.time
-          window.restorePlayInfo = null
-          audio.pause()
-          this.stopPlay()
-        } else if (this.restorePlayTime) {
+        if (this.restorePlayTime) {
           audio.currentTime = this.restorePlayTime
           this.restorePlayTime = 0
         }
@@ -450,7 +471,7 @@ export default {
     },
     async play() {
       console.log('play', this.playIndex)
-      this.checkDelayNextTimeout()
+      this.clearDelayNextTimeout()
       let targetSong = this.targetSong = this.list[this.playIndex]
       if (this.setting.player.togglePlayMethod == 'random') this.setPlayedList(targetSong)
       this.retryNum = 0
@@ -487,7 +508,7 @@ export default {
         album: this.musicInfo.album,
       })
     },
-    checkDelayNextTimeout() {
+    clearDelayNextTimeout() {
       // console.log(this.delayNextTimeout)
       if (this.delayNextTimeout) {
         clearTimeout(this.delayNextTimeout)
@@ -495,7 +516,7 @@ export default {
       }
     },
     addDelayNextTimeout() {
-      this.checkDelayNextTimeout()
+      this.clearDelayNextTimeout()
       this.delayNextTimeout = setTimeout(() => {
         this.delayNextTimeout = null
         this.handleNext()
@@ -651,7 +672,13 @@ export default {
       )
     },
     togglePlay() {
-      if (!audio.src) return
+      if (!audio.src) {
+        if (this.restorePlayTime != null) {
+          if (!this.assertApiSupport(this.targetSong.source)) return this.handleNext()
+          this.setUrl(this.targetSong)
+        }
+        return
+      }
       if (this.isPlay) {
         audio.pause()
         this.clearBufferTimeout()
@@ -669,20 +696,39 @@ export default {
       if (highQuality && songInfo._types['320k'] && list && list.includes('320k')) type = '320k'
       return type
     },
-    setUrl(targetSong, isRefresh, isRetryed = false) {
+    setUrl(targetSong, isRefresh, isRetryed = false, retryedSource = [], originMusic = null) {
+      if (!retryedSource.includes(targetSong.source)) retryedSource.push(targetSong.source)
+
       let type = this.getPlayType(this.setting.player.highQuality, targetSong)
       this.musicInfo.url = targetSong.typeUrl[type]
       this.status = this.statusText = this.$t('core.player.geting_url')
 
-      return this.getUrl({ musicInfo: targetSong, type, isRefresh }).then(() => {
+      return this.getUrl({ musicInfo: targetSong, originMusic, type, isRefresh }).then(() => {
         audio.src = this.musicInfo.url = targetSong.typeUrl[type]
       }).catch(err => {
         // console.log('err', err.message)
         if (err.message == requestMsg.cancelRequest) return
-        if (!isRetryed) return this.setUrl(targetSong, isRefresh, true)
-        this.status = this.statusText = err.message
-        this.addDelayNextTimeout()
-        return Promise.reject(err)
+        if (!isRetryed) return this.setUrl(targetSong, isRefresh, true, retryedSource, originMusic)
+        if (!originMusic) originMusic = targetSong
+
+        this.status = this.statusText = 'Try toggle source...'
+
+        return (originMusic.otherSource && originMusic.otherSource.length ? Promise.resolve(originMusic.otherSource) : musicSdk.findMusic(originMusic)).then(res => {
+          this.updateMusicInfo({ id: this.listId, index: this.playIndex, data: { otherSource: res } })
+          return res
+        }).then(otherSource => {
+          console.log('find otherSource', otherSource)
+          if (otherSource.length) {
+            for (const item of otherSource) {
+              if (retryedSource.includes(item.source)) continue
+              console.log('try toggle to: ', item.source, item.name, item.singer, item.interval)
+              return this.setUrl(item, isRefresh, false, retryedSource, originMusic)
+            }
+          }
+          this.status = this.statusText = err.message
+          this.addDelayNextTimeout()
+          return Promise.reject(err)
+        })
       })
     },
     setImg(targetSong) {
@@ -801,7 +847,7 @@ export default {
       // console.log('start load timeout')
       this.loadingTimeout = setTimeout(() => {
         this.handleNext()
-      }, 10000)
+      }, 20000)
     },
     clearLoadingTimeout() {
       if (!this.loadingTimeout) return
@@ -810,7 +856,7 @@ export default {
       this.loadingTimeout = null
     },
     startBuffering() {
-      console.error('start t')
+      console.log('start t')
       if (this.mediaBuffer.timeout) return
       this.mediaBuffer.timeout = setTimeout(() => {
         this.mediaBuffer.timeout = null
