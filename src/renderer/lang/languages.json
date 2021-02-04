@@ -11,5 +11,10 @@
     "locale": "zh-tw",
     "alternate": "zh-hk",
     "country": "cn"
+  },
+  {
+    "name": "English",
+    "locale": "en-us",
+    "country": "us"
   }
 ]

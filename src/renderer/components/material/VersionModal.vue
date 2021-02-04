@@ -3,17 +3,17 @@ material-modal(:show="version.showModal" @close="handleClose" v-if="version.newV
   main(:class="$style.main" v-if="version.isDownloaded")
     h2 🚀程序更新🚀
 
-    div.scroll(:class="$style.info")
+    div.scroll.select(:class="$style.info")
       div(:class="$style.current")
         h3 最新版本：{{version.newVersion.version}}
         h3 当前版本：{{version.version}}
         h3 版本变化：
-        p(:class="$style.desc" v-html="version.newVersion.desc")
+        pre(:class="$style.desc" v-text="version.newVersion.desc")
       div(:class="[$style.history, $style.desc]" v-if="history.length")
         h3 历史版本：
         div(:class="$style.item" v-for="ver in history")
           h4 v{{ver.version}}
-          p(v-html="ver.desc")
+          pre(v-text="ver.desc")
     div(:class="$style.footer")
       div(:class="$style.desc")
         p 新版本已下载完毕，
@@ -27,17 +27,17 @@ material-modal(:show="version.showModal" @close="handleClose" v-if="version.newV
   main(:class="$style.main" v-else-if="version.isError && !version.isUnknow && version.newVersion.version != version.version")
     h2 🌟发现新版本🌟
 
-    div.scroll(:class="$style.info")
+    div.scroll.select(:class="$style.info")
       div(:class="$style.current")
         h3 最新版本：{{version.newVersion.version}}
         h3 当前版本：{{version.version}}
         h3 版本变化：
-        p(:class="$style.desc" v-html="version.newVersion.desc")
+        pre(:class="$style.desc" v-text="version.newVersion.desc")
       div(:class="[$style.history, $style.desc]" v-if="history.length")
         h3 历史版本：
         div(:class="$style.item" v-for="ver in history")
           h4 v{{ver.version}}
-          p(v-html="ver.desc")
+          pre(v-text="ver.desc")
 
     div(:class="$style.footer")
       div(:class="$style.desc")
@@ -70,17 +70,17 @@ material-modal(:show="version.showModal" @close="handleClose" v-if="version.newV
   main(:class="$style.main" v-else)
     h2 🌟发现新版本🌟
 
-    div.scroll(:class="$style.info")
+    div.scroll.select(:class="$style.info")
       div(:class="$style.current")
         h3 最新版本：{{version.newVersion.version}}
         h3 当前版本：{{version.version}}
         h3 版本变化：
-        p(:class="$style.desc" v-html="version.newVersion.desc")
+        pre(:class="$style.desc" v-text="version.newVersion.desc")
       div(:class="[$style.history, $style.desc]" v-if="history.length")
         h3 历史版本：
         div(:class="$style.item" v-for="ver in history")
           h4 v{{ver.version}}
-          p(v-html="ver.desc")
+          pre(v-text="ver.desc")
 
     div(:class="$style.footer")
       div(:class="$style.desc")
@@ -117,7 +117,7 @@ export default {
     progress() {
       return this.version.downloadProgress
         ? `${this.version.downloadProgress.percent.toFixed(2)}% - ${sizeFormate(this.version.downloadProgress.transferred)}/${sizeFormate(this.version.downloadProgress.total)} - ${sizeFormate(this.version.downloadProgress.bytesPerSecond)}/s`
-        : '初始化中...'
+        : '处理更新中...'
     },
     isIgnored() {
       return this.setting.ignoreVersion == this.version.newVersion.version
@@ -177,6 +177,11 @@ export default {
   h3 {
     font-size: 14px;
     line-height: 1.3;
+  }
+  pre {
+    white-space: pre-wrap;
+    text-align: justify;
+    margin-top: 10px;
   }
 }
 
